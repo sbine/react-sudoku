@@ -16,24 +16,6 @@ var EventEmitter = {
 	}
 }
 
-var Board = React.createClass({
-	handleValidation: function() {
-		console.log('validating');
-	},
-	handleReset: function() {
-		EventEmitter.dispatch('reset');
-	},
-	render: function() {
-		return (
-			<div>
-				<Puzzle />
-
-				<ResetButton handleReset={this.handleReset} />
-			</div>
-		)
-	}
-});
-
 var Puzzle = React.createClass(Radium.wrap({
 	getInitialState: function() {
 		return {
@@ -41,6 +23,7 @@ var Puzzle = React.createClass(Radium.wrap({
 		}
 	},
 	componentDidMount: function() {
+		EventEmitter.subscribe('validate', this.validatePuzzle);
 		EventEmitter.subscribe('reset', this.resetPuzzle);
 		this.resetPuzzle();
 	},
@@ -76,22 +59,38 @@ var Puzzle = React.createClass(Radium.wrap({
 
 		return cells2D;
 	},
+	updateCell: function(cellIndex, value) {
+		var cells = this.state.cells;
+		var keys = _.keys(cells);
+		cells[keys[cellIndex]] = value;
+		this.setState({
+			cells: cells
+		})
+	},
+	validatePuzzle: function() {
+		console.log('validating puzzle');
+		console.log(this.state.cells);
+		console.log(sudoku.getConflicts(this.state.cells));
+	},
 	resetPuzzle: function() {
-		console.log('resetting puzzle');
 		this.setState({
 			cells: this.createCellMatrix()
 		});
 	},
 	render: function() {
+		var me = this;
 		var cells = this.getCells2D();
+		var cellIndex = -1;
+
 		return (
 			<table>
 				<tbody>
-					{cells.map(function(row) {
+					{_.map(cells, function(row) {
 						return (
 							<tr>
-								{row.map(function(cell) {
-									return <Cell value={cell} />;
+								{_.map(row, function(cell) {
+									cellIndex++;
+									return <td><Cell index={cellIndex} value={cell} updateHandler={me.updateCell} /></td>;
 								})}
 							</tr>
 						);
@@ -114,37 +113,36 @@ var Cell = React.createClass(Radium.wrap({
 		});
 	},
 	handleChange: function(event) {
+		var html = this.getDOMNode().value;
 		this.setState({
-			value: event.target.value
+			value: html
 		});
+		this.props.updateHandler(this.props.index, html);
 	},
 	render: function() {
 		return (
-			<td contentEditable="true" style={[cellStyles]}>
-				{this.state.value}
-			</td>
+			<input type="text" value={this.state.value} onChange={this.handleChange} style={[cellStyles]} />
 		)
 	}
 }));
 
 
-
 var cellStyles = {
-	border: '1px solid gray',
 	cursor: 'pointer',
 	fontSize: 18,
-	fontWeight: 'bold',
 	margin: 0,
-	padding: '3px 6px',
+	padding: '2px 5px',
 	width: 10,
+	outline: 0,
 	":hover": {
-		background: '#eee'
+		background: '#eee',
+		border: 'none'
 	}
 }
 
 var ValidateButton = React.createClass(Radium.wrap({
 	handleValidation: function() {
-		this.props.handleValidation();
+		EventEmitter.dispatch('validate');
 	},
 	render: function() {
 		return (
@@ -157,7 +155,7 @@ var ValidateButton = React.createClass(Radium.wrap({
 
 var ResetButton = React.createClass(Radium.wrap({
 	handleReset: function() {
-		this.props.handleReset();
+		EventEmitter.dispatch('reset');
 	},
 	render: function() {
 		return (
@@ -176,6 +174,10 @@ var buttonStyles = {
 
 
 React.render(
-	<Board />,
+	<div>
+		<Puzzle />
+		<ValidateButton />
+		<ResetButton />
+	</div>,
 	document.getElementById('board')
 );
