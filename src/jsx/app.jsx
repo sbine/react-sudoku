@@ -1,11 +1,48 @@
-var Board = React.createClass(Radium.wrap({
+var EventEmitter = {
+    eventRepository: {},
+	dispatch: function (event, data) {
+		if (!this.eventRepository[event]) {
+			return;
+		}
+		for (var i = 0; i < this.eventRepository[event].length; i++) {
+			this.eventRepository[event][i](data);
+		}
+	},
+	subscribe: function (event, callback) {
+		if (!this.eventRepository[event]) {
+			this.eventRepository[event] = [];
+		}
+		this.eventRepository[event].push(callback);
+	}
+}
+
+var Board = React.createClass({
+	handleValidation: function() {
+		console.log('validating');
+	},
+	handleReset: function() {
+		EventEmitter.dispatch('reset');
+	},
+	render: function() {
+		return (
+			<div>
+				<Puzzle />
+
+				<ResetButton handleReset={this.handleReset} />
+			</div>
+		)
+	}
+});
+
+var Puzzle = React.createClass(Radium.wrap({
 	getInitialState: function() {
 		return {
 			cells: []
 		}
 	},
 	componentDidMount: function() {
-		this.setState({ cells: this.createCellMatrix() });
+		EventEmitter.subscribe('reset', this.resetPuzzle);
+		this.resetPuzzle();
 	},
 	createCellMatrix: function() {
 		var generated = sudoku.generate();
@@ -39,6 +76,12 @@ var Board = React.createClass(Radium.wrap({
 
 		return cells2D;
 	},
+	resetPuzzle: function() {
+		console.log('resetting puzzle');
+		this.setState({
+			cells: this.createCellMatrix()
+		});
+	},
 	render: function() {
 		var cells = this.getCells2D();
 		return (
@@ -65,8 +108,15 @@ var Cell = React.createClass(Radium.wrap({
 			value: this.props.value || ''
 		};
 	},
+	componentWillReceiveProps: function(nextProps) {
+		this.setState({
+			value: nextProps.value
+		});
+	},
 	handleChange: function(event) {
-		this.setState({value: event.target.value});
+		this.setState({
+			value: event.target.value
+		});
 	},
 	render: function() {
 		return (
@@ -77,15 +127,7 @@ var Cell = React.createClass(Radium.wrap({
 	}
 }));
 
-var boardStyles = {
-	border: '1px solid black',
-	borderRadius: 4,
-	margin: "20px auto",
-	outline: 0,
-	padding: 3,
-	cellPadding: 0,
-	cellSpacing: 0
-}
+
 
 var cellStyles = {
 	border: '1px solid gray',
@@ -100,4 +142,40 @@ var cellStyles = {
 	}
 }
 
-React.render(<Board/>, document.getElementById('board'));
+var ValidateButton = React.createClass(Radium.wrap({
+	handleValidation: function() {
+		this.props.handleValidation();
+	},
+	render: function() {
+		return (
+			<button style={[buttonStyles]} onClick={this.handleValidation}>
+				Validate
+			</button>
+		)
+	}
+}));
+
+var ResetButton = React.createClass(Radium.wrap({
+	handleReset: function() {
+		this.props.handleReset();
+	},
+	render: function() {
+		return (
+			<button style={[buttonStyles]} onClick={this.handleReset}>
+				Reset
+			</button>
+		)
+	}
+}));
+
+var buttonStyles = {
+	margin: "10px 5px",
+	display: 'inline',
+	outline: 0
+}
+
+
+React.render(
+	<Board />,
+	document.getElementById('board')
+);
