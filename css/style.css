@@ -33,14 +33,18 @@ input.sudoku-cell {
 	margin: 0;
 	padding: 2px 5px;
 	width: 10px;
-	outline: 0;
 }
-input.sudoku-cell:hover {
-	background-color: #eee;
-	border: none;
+input.sudoku-cell:hover:not([readonly]) {
+	border-color: green;
 }
 button.sudoku-control {
 	margin: 10px 5px;
 	display: inline;
 	outline: 0;
+}
+input[readonly] {
+	background-color: #ededed;
+}
+input[readonly]:hover {
+	cursor: default;
 }
