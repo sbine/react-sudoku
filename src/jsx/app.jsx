@@ -73,7 +73,8 @@ var Puzzle = React.createClass({
 		cells[keys[cellIndex]] = value;
 
 		this.setState({
-			cells: cells
+			cells: cells,
+			errored: []
 		})
 	},
 	validatePuzzle: function() {
@@ -81,7 +82,6 @@ var Puzzle = React.createClass({
 		var erroredFields = [];
 
 		if (!conflicts.length > 0) {
-			console.log('puzzle is valid');
 			return true;
 		}
 
@@ -97,8 +97,6 @@ var Puzzle = React.createClass({
 		this.setState({
 			errored: erroredFields
 		});
-
-		console.log('puzzle is invalid');
 	},
 	resetPuzzle: function() {
 		this.replaceState(this.getInitialState(), function() {
