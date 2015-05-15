@@ -78,13 +78,20 @@ var Puzzle = React.createClass({
 	},
 	validatePuzzle: function() {
 		var conflicts = sudoku.getConflicts(this.state.cells);
+		var erroredFields = [];
 
 		if (!conflicts.length > 0) {
 			console.log('puzzle is valid');
 			return true;
 		}
 
-		var erroredFields = conflicts[0].errorFields;
+		// Loop over all conflicts and add each conflicted cell to our error object
+		_.each(conflicts, function(value, key) {
+			_.each(value.errorFields, function(v, k) {
+				erroredFields.push(v);
+			});
+		});
+
 		var erroredQuadrant = conflicts[0].unit;
 
 		this.setState({
@@ -92,8 +99,6 @@ var Puzzle = React.createClass({
 		});
 
 		console.log('puzzle is invalid');
-		console.log(erroredFields);
-		console.log(erroredQuadrant);
 	},
 	resetPuzzle: function() {
 		this.replaceState(this.getInitialState(), function() {
