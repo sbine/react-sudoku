@@ -1,5 +1,5 @@
 var EventEmitter = {
-    eventRepository: {},
+	eventRepository: {},
 	dispatch: function (event, data) {
 		if (!this.eventRepository[event]) {
 			return;
@@ -19,6 +19,7 @@ var EventEmitter = {
 var Puzzle = React.createClass({
 	getInitialState: function() {
 		return {
+			board: sudoku.generate(),
 			cells: {},
 			errored: []
 		}
@@ -26,10 +27,10 @@ var Puzzle = React.createClass({
 	componentDidMount: function() {
 		EventEmitter.subscribe('validate', this.validatePuzzle);
 		EventEmitter.subscribe('reset', this.resetPuzzle);
-		this.resetPuzzle();
+		this.createCellMatrix();
 	},
 	createCellMatrix: function() {
-		var generated = sudoku.generate();
+		var generated = this.state.board;
 		var board = {};
 
 		for (i = 65; i <= 73; i++) {
@@ -48,6 +49,10 @@ var Puzzle = React.createClass({
 			}
 		}
 
+		this.setState({
+			cells: board
+		});
+
 		return board;
 	},
 	getCells2D: function() {
@@ -64,7 +69,9 @@ var Puzzle = React.createClass({
 	updateCell: function(cellIndex, value) {
 		var cells = this.state.cells;
 		var keys = _.keys(cells);
+
 		cells[keys[cellIndex]] = value;
+
 		this.setState({
 			cells: cells
 		})
@@ -89,9 +96,8 @@ var Puzzle = React.createClass({
 		console.log(erroredQuadrant);
 	},
 	resetPuzzle: function() {
-		this.setState({
-			cells: this.createCellMatrix(),
-			errored: []
+		this.replaceState(this.getInitialState(), function() {
+			this.createCellMatrix();
 		});
 	},
 	render: function() {
@@ -109,12 +115,18 @@ var Puzzle = React.createClass({
 								{_.map(row, function(cell) {
 									cellIndex++;
 									var errored = false;
+									var readonly = false;
 									if (me.state.errored.indexOf(cellsIndexed[cellIndex]) !== -1) {
 										errored = true;
+									}
+									if (me.state.board[cellsIndexed[cellIndex]] !== undefined) {
+										readonly = 'readonly';
+										cell = me.state.board[cellsIndexed[cellIndex]];
 									}
 									return <Cell
 												index={cellIndex}
 												value={cell}
+												readonly={readonly}
 												errored={errored}
 												updateHandler={me.updateCell}/>;
 								})}
@@ -139,7 +151,8 @@ var Cell = React.createClass({
 						value={this.props.value}
 						onChange={this.handleChange}
 						data-errored={this.props.errored}
-						className="sudoku-cell" />
+						className="sudoku-cell"
+						readOnly={this.props.readonly} />
 			</td>
 		)
 	}
