@@ -19,7 +19,8 @@ var EventEmitter = {
 var Puzzle = React.createClass(Radium.wrap({
 	getInitialState: function() {
 		return {
-			cells: []
+			cells: {},
+			errored: []
 		}
 	},
 	componentDidMount: function() {
@@ -29,7 +30,7 @@ var Puzzle = React.createClass(Radium.wrap({
 	},
 	createCellMatrix: function() {
 		var generated = sudoku.generate();
-		var board = [];
+		var board = {};
 
 		for (i = 65; i <= 73; i++) {
 			var quadrant = String.fromCharCode(i);
@@ -38,6 +39,7 @@ var Puzzle = React.createClass(Radium.wrap({
 				var cell = quadrant + '' + j;
 
 				if (generated[cell] !== undefined) {
+					board[cell] = {};
 					board[cell] = generated[cell];
 				}
 				else {
@@ -68,18 +70,34 @@ var Puzzle = React.createClass(Radium.wrap({
 		})
 	},
 	validatePuzzle: function() {
-		console.log('validating puzzle');
-		console.log(this.state.cells);
-		console.log(sudoku.getConflicts(this.state.cells));
+		var conflicts = sudoku.getConflicts(this.state.cells);
+
+		if (!conflicts.length > 0) {
+			console.log('puzzle is valid');
+			return true;
+		}
+
+		var erroredFields = conflicts[0].errorFields;
+		var erroredQuadrant = conflicts[0].unit;
+
+		this.setState({
+			errored: erroredFields
+		});
+
+		console.log('puzzle is invalid');
+		console.log(erroredFields);
+		console.log(erroredQuadrant);
 	},
 	resetPuzzle: function() {
 		this.setState({
-			cells: this.createCellMatrix()
+			cells: this.createCellMatrix(),
+			errored: []
 		});
 	},
 	render: function() {
 		var me = this;
 		var cells = this.getCells2D();
+		var cellsIndexed = _.keys(this.state.cells);
 		var cellIndex = -1;
 
 		return (
@@ -90,7 +108,15 @@ var Puzzle = React.createClass(Radium.wrap({
 							<tr>
 								{_.map(row, function(cell) {
 									cellIndex++;
-									return <td><Cell index={cellIndex} value={cell} updateHandler={me.updateCell} /></td>;
+									var errored = false;
+									if (me.state.errored.indexOf(cellsIndexed[cellIndex]) !== -1) {
+										errored = true;
+									}
+									return <Cell
+												index={cellIndex}
+												value={cell}
+												errored={errored}
+												updateHandler={me.updateCell}/>;
 								})}
 							</tr>
 						);
@@ -102,26 +128,19 @@ var Puzzle = React.createClass(Radium.wrap({
 }));
 
 var Cell = React.createClass(Radium.wrap({
-	getInitialState: function() {
-		return {
-			value: this.props.value || ''
-		};
-	},
-	componentWillReceiveProps: function(nextProps) {
-		this.setState({
-			value: nextProps.value
-		});
-	},
 	handleChange: function(event) {
-		var html = this.getDOMNode().value;
-		this.setState({
-			value: html
-		});
+		var html = this.getDOMNode().firstChild.value;
 		this.props.updateHandler(this.props.index, html);
 	},
 	render: function() {
 		return (
-			<input type="text" value={this.state.value} onChange={this.handleChange} style={[cellStyles]} />
+			<td>
+				<input type="text"
+						value={this.props.value}
+						onChange={this.handleChange}
+						data-errored={this.props.errored}
+						style={[cellStyles]} />
+			</td>
 		)
 	}
 }));
@@ -160,7 +179,7 @@ var ResetButton = React.createClass(Radium.wrap({
 	render: function() {
 		return (
 			<button style={[buttonStyles]} onClick={this.handleReset}>
-				Reset
+				New Puzzle
 			</button>
 		)
 	}

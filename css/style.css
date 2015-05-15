@@ -1,0 +1,29 @@
+#container {
+	margin: 0 auto;
+	text-align: center;
+}
+#board {
+	display: inline-block;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+td {
+	padding: 0;
+}
+td:nth-child(3n+1) {
+	border-left: 2px solid black !important;
+}
+td:nth-child(3n+0) {
+	border-right: 2px solid black !important;
+}
+tr:nth-child(1) {
+	border-top: 2px solid black;
+}
+tr:nth-child(3n+0) {
+	border-bottom: 2px solid black;
+}
+input[data-errored="true"] {
+	background-color: #F44F4F;
+}
