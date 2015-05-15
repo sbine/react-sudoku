@@ -18,6 +18,17 @@ module.exports = function (grunt) {
       }
     },
 
+    copy: {
+      react: {
+        src: 'bower_components/react/react.min.js',
+        dest: 'js/react.min.js'
+      },
+      underscore: {
+        src: 'bower_components/underscore/underscore-min.js',
+        dest: 'js/underscore.min.js'
+      }
+    },
+
     uglify: {
       build: {
         src: 'build/**/*.js',
@@ -35,6 +46,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'react',
+    'copy',
     'uglify'
   ]);
 
