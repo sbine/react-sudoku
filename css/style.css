@@ -1,5 +1,6 @@
 html, body {
-	font-family: Arial;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	background-color: #efeae1;
 }
 #container {
 	margin: 0 auto;
@@ -7,6 +8,9 @@ html, body {
 }
 #board {
 	display: inline-block;
+}
+h1 {
+	font-weight: 300;
 }
 table {
 	border-collapse: collapse;
@@ -29,6 +33,7 @@ tr:nth-child(3n+0) {
 }
 input[data-errored="true"] {
 	background-color: #F44F4F;
+	border-color: #F44F4F;
 }
 input.sudoku-cell {
 	cursor: pointer;
@@ -38,7 +43,7 @@ input.sudoku-cell {
 	width: 10px;
 }
 input.sudoku-cell:hover:not([readonly]) {
-	border-color: green;
+	border-color: #584b4f;
 }
 button.sudoku-control {
 	margin: 10px 5px;
@@ -46,7 +51,7 @@ button.sudoku-control {
 	outline: 0;
 }
 input[readonly] {
-	background-color: #ededed;
+	background-color: #dce1ea;
 }
 input[readonly]:hover {
 	cursor: default;
