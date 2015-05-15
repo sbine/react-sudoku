@@ -27,3 +27,20 @@ tr:nth-child(3n+0) {
 input[data-errored="true"] {
 	background-color: #F44F4F;
 }
+input.sudoku-cell {
+	cursor: pointer;
+	font-size: 18px;
+	margin: 0;
+	padding: 2px 5px;
+	width: 10px;
+	outline: 0;
+}
+input.sudoku-cell:hover {
+	background-color: #eee;
+	border: none;
+}
+button.sudoku-control {
+	margin: 10px 5px;
+	display: inline;
+	outline: 0;
+}

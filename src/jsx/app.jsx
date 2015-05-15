@@ -16,7 +16,7 @@ var EventEmitter = {
 	}
 }
 
-var Puzzle = React.createClass(Radium.wrap({
+var Puzzle = React.createClass({
 	getInitialState: function() {
 		return {
 			cells: {},
@@ -125,9 +125,9 @@ var Puzzle = React.createClass(Radium.wrap({
 			</table>
 		)
 	}
-}));
+});
 
-var Cell = React.createClass(Radium.wrap({
+var Cell = React.createClass({
 	handleChange: function(event) {
 		var html = this.getDOMNode().firstChild.value;
 		this.props.updateHandler(this.props.index, html);
@@ -139,57 +139,37 @@ var Cell = React.createClass(Radium.wrap({
 						value={this.props.value}
 						onChange={this.handleChange}
 						data-errored={this.props.errored}
-						style={[cellStyles]} />
+						className="sudoku-cell" />
 			</td>
 		)
 	}
-}));
+});
 
-
-var cellStyles = {
-	cursor: 'pointer',
-	fontSize: 18,
-	margin: 0,
-	padding: '2px 5px',
-	width: 10,
-	outline: 0,
-	":hover": {
-		background: '#eee',
-		border: 'none'
-	}
-}
-
-var ValidateButton = React.createClass(Radium.wrap({
+var ValidateButton = React.createClass({
 	handleValidation: function() {
 		EventEmitter.dispatch('validate');
 	},
 	render: function() {
 		return (
-			<button style={[buttonStyles]} onClick={this.handleValidation}>
+			<button className="sudoku-control" onClick={this.handleValidation}>
 				Validate
 			</button>
 		)
 	}
-}));
+});
 
-var ResetButton = React.createClass(Radium.wrap({
+var ResetButton = React.createClass({
 	handleReset: function() {
 		EventEmitter.dispatch('reset');
 	},
 	render: function() {
 		return (
-			<button style={[buttonStyles]} onClick={this.handleReset}>
+			<button className="sudoku-control" onClick={this.handleReset}>
 				New Puzzle
 			</button>
 		)
 	}
-}));
-
-var buttonStyles = {
-	margin: "10px 5px",
-	display: 'inline',
-	outline: 0
-}
+});
 
 
 React.render(
